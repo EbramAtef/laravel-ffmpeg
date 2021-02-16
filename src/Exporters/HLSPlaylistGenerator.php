@@ -24,11 +24,16 @@ class HLSPlaylistGenerator implements PlaylistGenerator
     private function getFrameRate(MediaOpener $media)
     {
         $mediaStream = $media->getVideoStream();
-
-        $frameRate = trim(Str::before(optional($mediaStream)->get('avg_frame_rate'), "/1"));
+        $frameRate = optional($mediaStream)->get('avg_frame_rate');
 
         if (!$frameRate || Str::endsWith($frameRate, '/0')) {
             return null;
+        }
+
+        $frameRate = trim(Str::before($frameRate, "/1"));
+        if(strpos($frameRate, "/") !== false){
+            $frameRate = explode("/", $frameRate);
+            $frameRate = intval($frameRate[0]) / intval($frameRate[1]);
         }
 
         return $frameRate ? number_format($frameRate, 3, '.', '') : null;
